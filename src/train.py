@@ -5,7 +5,7 @@ from torch.optim.lr_scheduler import MultiStepLR
 import torch.nn as nn
 import numpy as np
 import random
-from utils import json_file_to_pyobj
+from utils import json_file_to_pyobj, get_loaders
 from WideResNet import WideResNet
 
 
@@ -95,18 +95,7 @@ def train(args):
         logfile = ''
 
     checkpoint = bool(training_configurations.checkpoint)
-
-    if dataset == 'cifar10':
-
-        from utils import cifar10loaders
-        loaders = cifar10loaders()
-
-    elif dataset == 'svhn':
-
-        from utils import svhnLoaders
-        loaders = svhnLoaders()
-    else:
-        ValueError('Datasets to choose from: CIFAR10 and SVHN')
+    loaders = get_loaders(dataset)
 
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
