@@ -10,12 +10,12 @@ At the moment the CIFAR10 and SVHN datasets are fully supported, with specific a
 
 Train a WideResNet-16-1 on CIFAR10: 
 ```
-python train_scratches.py --config configs/WRN-16-1-scratch-CIFAR10.json
+python train.py --config configs/WRN-16-1-scratch-CIFAR10.json
 ```
 
 Train a WideResNet-40-2 on SVHN: 
 ```
-python train_scratches.py --config configs/WRN-40-2-scratch-SVHN.json
+python train.py --config configs/WRN-40-2-scratch-SVHN.json
 ```
 
 ## Results
