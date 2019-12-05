@@ -17,9 +17,14 @@ def set_seed(seed=42):
     torch.cuda.manual_seed(seed)
 
 
-def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
+def _train_seed(net, loaders, device, dataset, log=False, checkpoint=False, logfile='', checkpointFile=''):
+
     train_loader, test_loader = loaders
-    epochs = 200
+
+    if dataset == 'svhn':
+        epochs = 100
+    else:
+        epochs = 200
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
@@ -85,16 +90,16 @@ def train(args):
     wrn_width = training_configurations.wrn_width
     dataset = training_configurations.dataset.lower()
     seeds = [int(seed) for seed in training_configurations.seeds]
-    log = bool(training_configurations.checkpoint)
+    log = True if training_configurations.log.lower() == 'true' else False
 
     if log:
         logfile = 'WideResNet-{}-{}-{}.txt'.format(wrn_depth, wrn_width, training_configurations.dataset)
         with open(logfile, 'w') as temp:
-            temp.write('WideResNet-{}-{} in {}\n'.format(wrn_depth, wrn_width, training_configurations.dataset))
+            temp.write('WideResNet-{}-{} on {}\n'.format(wrn_depth, wrn_width, training_configurations.dataset))
     else:
         logfile = ''
 
-    checkpoint = bool(training_configurations.checkpoint)
+    checkpoint = True if training_configurations.checkpoint.lower() == 'true' else False
     loaders = get_loaders(dataset)
 
     if torch.cuda.is_available():
@@ -116,17 +121,13 @@ def train(args):
         net = net.to(device)
 
         checkpointFile = 'wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset, seed) if checkpoint else ''
-        best_test_set_accuracy = _train_seed(net, loaders, device, log, checkpoint, logfile, checkpointFile)
+        best_test_set_accuracy = _train_seed(net, loaders, device, dataset, log, checkpoint, logfile, checkpointFile)
 
         if log:
             with open(logfile, 'a') as temp:
                 temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
         test_set_accuracies.append(best_test_set_accuracy)
-
-        if log:
-            with open(logfile, 'a') as temp:
-                temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
     mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
 
